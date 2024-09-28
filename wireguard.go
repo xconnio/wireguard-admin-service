@@ -1,11 +1,14 @@
 package wireguard_admin_service
 
 import (
+	"bufio"
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"math/big"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 
 	"github.com/joho/godotenv"
@@ -19,6 +22,10 @@ func AddUser(clientName string) error {
 	params, err := godotenv.Read("/etc/wireguard/params")
 	if err != nil {
 		return fmt.Errorf("error loading .env file: %w", err)
+	}
+
+	if err = validateClientName(clientName, params["SERVER_WG_NIC"]); err != nil {
+		return err
 	}
 
 	ipv4s, ipv6s, err := getExistingIPs(params["SERVER_WG_NIC"])
@@ -100,6 +107,40 @@ AllowedIPs = %s/32,%s/128
 	}
 
 	return syncWireGuardConfig(params["SERVER_WG_NIC"])
+}
+
+// validateClientName checks if the client name is valid and doesn't already exist in the file.
+func validateClientName(clientName, serverWgNic string) error {
+	validNamePattern := regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)
+	if !validNamePattern.MatchString(clientName) {
+		return errors.New("invalid client name: only alphanumeric characters, underscores, and hyphens are allowed")
+	}
+	if len(clientName) >= 16 {
+		return errors.New("client name must be less than 16 characters")
+	}
+
+	// Check if the client name already exists in the configuration file
+	filePath := fmt.Sprintf("/etc/wireguard/%s.conf", serverWgNic)
+	file, err := os.Open(filePath)
+	if err != nil {
+		return fmt.Errorf("unable to open configuration file: %w", err)
+	}
+	defer file.Close()
+
+	clientExistsPattern := fmt.Sprintf("### Client %s", clientName)
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		if strings.TrimSpace(scanner.Text()) == clientExistsPattern {
+			return errors.New("a client with the specified name already exists, please choose another name")
+		}
+	}
+
+	if scanner.Err() != nil {
+		return fmt.Errorf("error reading configuration file: %w", err)
+	}
+
+	return nil
 }
 
 func getExistingIPs(deviceName string) (ipv4s, ipv6s map[string]string, err error) {

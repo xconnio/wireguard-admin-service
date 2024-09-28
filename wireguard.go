@@ -17,7 +17,7 @@ import (
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 )
 
-// AddUser adds new wireguard user
+// AddUser adds new wireguard user.
 func AddUser(clientName string) error {
 	params, err := godotenv.Read("/etc/wireguard/params")
 	if err != nil {
@@ -199,7 +199,7 @@ func appendToFile(filePath, content string) error {
 }
 
 func generateQRCode(clientConfig, clientName string) error {
-	qrFilePath := fmt.Sprintf("%s-client-qr.png", clientName)
+	qrFilePath := fmt.Sprintf("qr-codes/%s-client-qr.png", clientName)
 	err := qrcode.WriteFile(clientConfig, qrcode.Medium, 256, qrFilePath)
 
 	return err

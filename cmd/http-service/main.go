@@ -18,13 +18,17 @@ type DeviceRequest struct {
 func main() {
 	r := gin.Default()
 
-	const imageDir = "./qr-codes"
-
-	if err := os.MkdirAll(imageDir, os.ModePerm); err != nil {
+	const qrDir = "./qr-codes"
+	if err := os.MkdirAll(qrDir, os.ModePerm); err != nil {
 		log.Fatal(err)
 	}
+	r.Static("qrs", qrDir)
 
-	r.Static("qr", imageDir)
+	const cfgDir = "./configs"
+	if err := os.MkdirAll(cfgDir, os.ModePerm); err != nil {
+		log.Fatal(err)
+	}
+	r.Static("configs", cfgDir)
 
 	r.POST("/device", func(c *gin.Context) {
 		var req DeviceRequest
@@ -38,10 +42,12 @@ func main() {
 			return
 		}
 
-		qrCode := fmt.Sprintf("http://%s/qr/%s-client-qr.png", c.Request.Host, req.DeviceName)
+		qrCode := fmt.Sprintf("http://%s/qrs/%s-client-qr.png", c.Request.Host, req.DeviceName)
+		config := fmt.Sprintf("http://%s/configs/client-%s.conf", c.Request.Host, req.DeviceName)
 
 		c.JSON(http.StatusOK, gin.H{
 			"qr_code": qrCode,
+			"config":  config,
 		})
 	})
 

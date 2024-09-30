@@ -81,10 +81,13 @@ DNS = %s,%s
 PublicKey = %s
 PresharedKey = %s
 Endpoint = %s
-AllowedIPs = %s`, clientPrivKey, clientIPv4, clientIPv6, params["CLIENT_DNS_1"], params["CLIENT_DNS_2"],
+AllowedIPs = %s
+`, clientPrivKey, clientIPv4, clientIPv6, params["CLIENT_DNS_1"], params["CLIENT_DNS_2"],
 		params["SERVER_PUB_KEY"], clientPreSharedKey, endpoint, params["ALLOWED_IPS"])
 
-	fmt.Println(clientConfig)
+	if err = os.WriteFile(fmt.Sprintf("configs/client-%s.conf", clientName), []byte(clientConfig), 0600); err != nil {
+		return fmt.Errorf("failed to write client config: %w", err)
+	}
 
 	err = generateQRCode(clientConfig, clientName)
 	if err != nil {
@@ -98,8 +101,6 @@ PublicKey = %s
 PresharedKey =%s
 AllowedIPs = %s/32,%s/128
 `, clientName, clientPubKey, clientPreSharedKey, clientIPv4, clientIPv6)
-
-	fmt.Println(peer)
 
 	err = appendToFile("/etc/wireguard/wg0.conf", peer)
 	if err != nil {

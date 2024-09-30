@@ -16,6 +16,10 @@ type DeviceRequest struct {
 }
 
 func main() {
+	if !wireguard_admin_service.IsRoot() {
+		log.Fatalln("You need to run this service as root")
+	}
+
 	r := gin.Default()
 
 	const qrDir = "./qr-codes"

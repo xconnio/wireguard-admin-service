@@ -20,6 +20,10 @@ func main() {
 		log.Fatalln("You need to run this service as root")
 	}
 
+	if err := wireguard_admin_service.EnsureWireguardInstallation(); err != nil {
+		log.Fatalln(err)
+	}
+
 	r := gin.Default()
 
 	const qrDir = "./qr-codes"

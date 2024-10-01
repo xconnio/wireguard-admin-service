@@ -294,7 +294,7 @@ SERVER_PUB_KEY=%s
 CLIENT_DNS_1=1.1.1.1
 CLIENT_DNS_2=1.0.0.1
 ALLOWED_IPS=0.0.0.0/0,::/0
-`, serverPublicIP, pubNIC, serverPort, serverPrivKey, serverPubKey)), 0644); err != nil {
+`, serverPublicIP, pubNIC, serverPort, serverPrivKey, serverPubKey)), 0600); err != nil {
 		return fmt.Errorf("failed to write file to %s: %w", wireguardParamsFile, err)
 	}
 
@@ -314,7 +314,7 @@ PostDown = iptables -D FORWARD -i wg0 -j ACCEPT
 PostDown = iptables -t nat -D POSTROUTING -o %s -j MASQUERADE
 PostDown = ip6tables -D FORWARD -i wg0 -j ACCEPT
 PostDown = ip6tables -t nat -D POSTROUTING -o %s -j MASQUERADE
-`, serverPort, serverPrivKey, serverPort, pubNIC, pubNIC, pubNIC, serverPort, pubNIC, pubNIC, pubNIC)), 0644)
+`, serverPort, serverPrivKey, serverPort, pubNIC, pubNIC, pubNIC, serverPort, pubNIC, pubNIC, pubNIC)), 0600)
 	if err != nil {
 		return fmt.Errorf("failed to write file to %s: %w", wireguardParamsFile, err)
 	}

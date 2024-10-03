@@ -278,8 +278,7 @@ func EnsureWireguardInstallation() error {
 		return fmt.Errorf("failed to get server port: %w", err)
 	}
 
-	err = runCommand("apt-get", []string{"install", "-y", "wireguard", "iptables", "resolvconf", "qrencode"}, "")
-	if err != nil {
+	if err = runCommand("apt-get", []string{"install", "-y", "wireguard", "iptables"}, ""); err != nil {
 		return fmt.Errorf("failed to install wireguard: %w", err)
 	}
 
@@ -325,17 +324,7 @@ net.ipv6.conf.all.forwarding = 1`), 0600)
 		return fmt.Errorf("failed to write file to /etc/sysctl.d/wg.conf: %w", err)
 	}
 
-	if err = runCommand("sysctl", []string{"--system"}, ""); err != nil {
-		return fmt.Errorf("failed to run command: %w", err)
-	}
-
-	if err = runCommand("systemctl", []string{"start", "wg-quick@wg0"}, ""); err != nil {
-		return fmt.Errorf("failed to start wg-quick: %w", err)
-	}
-
-	if err = runCommand("systemctl", []string{"enable", "wg-quick@wg0"}, ""); err != nil {
-		return fmt.Errorf("failed to enable wg-quick: %w", err)
-	}
+	_ = runCommand("wg-quick", []string{"up", "/etc/wireguard/wg0.conf"}, "")
 
 	return nil
 }

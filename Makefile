@@ -9,3 +9,9 @@ build-http:
 
 run-http:
 	go run github.com/xconnio/wireguard-admin-service/cmd/http-service
+
+build-docker:
+	docker build -t wireguard .
+
+run-docker:
+	docker compose up

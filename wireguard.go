@@ -278,8 +278,12 @@ func EnsureWireguardInstallation() error {
 		return fmt.Errorf("failed to get server port: %w", err)
 	}
 
-	if err = runCommand("apt-get", []string{"install", "-y", "wireguard", "iptables"}, ""); err != nil {
-		return fmt.Errorf("failed to install wireguard: %w", err)
+	_, err = exec.LookPath("wg")
+	if err != nil {
+		_ = runCommand("apt-get", []string{"update"}, "")
+		if err = runCommand("apt-get", []string{"install", "-y", "wireguard", "iptables"}, ""); err != nil {
+			return fmt.Errorf("failed to install wireguard: %w", err)
+		}
 	}
 
 	if err := os.WriteFile(wireguardParamsFile, []byte(fmt.Sprintf(`SERVER_PUB_IP=%s

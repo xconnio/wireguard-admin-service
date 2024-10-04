@@ -49,6 +49,9 @@ jobs:
             exit 1;
           fi
 
+      - name: Build docker
+        run: make build-docker
+
       - name: Run unit tests
         run: |
           make test
